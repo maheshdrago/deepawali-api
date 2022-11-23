@@ -1,0 +1,6 @@
+flask
+python-whois
+flask_restful
+flask_cors
+gunicorn
+python-dateutil
