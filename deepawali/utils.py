@@ -51,7 +51,7 @@ def text_cleaning(text):
         updated_keywords['three'] = []
 
         for i in keywords:
-            
+            print(i)
             if detectlanguage(i[0],False)=='en':
 
                 word_len = len(i[0].split())
@@ -61,7 +61,7 @@ def text_cleaning(text):
                     updated_keywords['two'].append({i[0]: text.count(i[0])+1})
                 elif word_len==3:
                     updated_keywords['three'].append({i[0]: text.count(i[0])+1})
-            
+        print(updates_keywords)
         return updated_keywords
 
     except Exception as e:
