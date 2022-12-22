@@ -13,7 +13,7 @@ from requests_html import HTMLSession
 import re
 
 
-
+#extract keywords
 
 def extract_keywords(text, wordcount, duplication, max_keywords):
     """
