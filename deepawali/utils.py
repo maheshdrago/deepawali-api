@@ -40,22 +40,33 @@ def extract_keywords(text, wordcount, duplication, max_keywords):
     except Exception as e:
         return []
 
-        
+
 def text_cleaning(text):
     try:
-        print("text_cleaning")
-        # removing more than one newline or spaces
         text = re.sub(r'[\n\r]+', '\n', text)
         keywords = extract_keywords(text, 4, 0.9, 100)
+        updated_keywords = dict()
+        updated_keywords['one'] = []
+        updated_keywords['two'] = []
+        updated_keywords['three'] = []
 
         for i in keywords:
-            print(i[0],'------->',text.count(i[0]))
-        
-        return keywords
+            
+            if detectlanguage(i[0],False)=='en':
+
+                word_len = len(i[0].split())
+                if word_len==1:
+                    updated_keywords['one'].append({i[0]: text.count(i[0])+1})
+                elif word_len==2:
+                    updated_keywords['two'].append({i[0]: text.count(i[0])+1})
+                elif word_len==3:
+                    updated_keywords['three'].append({i[0]: text.count(i[0])+1})
+            
+        return updated_keywords
 
     except Exception as e:
         print(e)
-        return ''
+        return dict()
 
 
 def get_page_content(url):
