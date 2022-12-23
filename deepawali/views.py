@@ -1,7 +1,7 @@
 from deepawali import app
 from flask_restful import Resource
 from flask import request,jsonify
-from deepawali.utils import get_domain_data, get_keyword_suggestions,extract_keywords,related_keywords,get_page_content
+from deepawali.utils import get_domain_data, get_keyword_suggestions,extract_keywords,related_keywords,get_page_content,get_keywords_from_text
 
 
 class GetDomainData(Resource):
@@ -39,9 +39,9 @@ class GetKeywordsFromText(Resource):
             duplication = data['duplication']
             max_keywords = data['max_keywords']
             
-            keywords = extract_keywords(text,wordcount,duplication,max_keywords)
+            keywords = get_keywords_from_text(text,wordcount,duplication,max_keywords)
             
-            return jsonify({"keywords": keywords})
+            return jsonify(keywords)
         
         except Exception as e:
             return e
