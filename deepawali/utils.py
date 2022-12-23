@@ -27,7 +27,7 @@ def get_site_links(url):
 
                 temp['status_code'] = response_code
                 temp['url'] = link.get('href')
-                urls.append(temp)
+                urls.append(link.get('href'))
         
         return urls
     except Exception as e:
