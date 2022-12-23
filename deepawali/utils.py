@@ -13,6 +13,22 @@ from requests_html import HTMLSession
 import re
 
 
+def get_site_links(url):
+    try:
+        reqs = requests.get(url)
+        soup = BeautifulSoup(reqs.text, 'html.parser')
+        
+        urls = []
+        for link in soup.find_all('a'):
+            flag = re.findall('^http|https.*',link.get('href'))
+            if flag:
+                urls.append(link.get('href'))
+        
+        return urls
+    except Exception as e:
+        print(e)
+        return []
+
 
 
 def extract_keywords(text, wordcount, duplication, max_keywords):
