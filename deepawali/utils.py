@@ -23,10 +23,10 @@ def get_site_links(url):
             flag = re.findall('^http|https.*',link.get('href'))
             if flag:
                 temp = dict()
-                response_code = requests.get(link.get('href')).status_code
+                #response_code = requests.get(link.get('href')).status_code
 
-                temp['status_code'] = response_code
-                temp['url'] = link.get('href')
+                #temp['status_code'] = response_code
+                #temp['url'] = link.get('href')
                 urls.append(link.get('href'))
         
         return urls
