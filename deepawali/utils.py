@@ -22,7 +22,12 @@ def get_site_links(url):
         for link in soup.find_all('a'):
             flag = re.findall('^http|https.*',link.get('href'))
             if flag:
-                urls.append(link.get('href'))
+                temp = dict()
+                response_code = requests.get(link.get('href')).status_code
+
+                temp['status_code'] = response_code
+                temp['url'] = link.get('href')
+                urls.append(temp)
         
         return urls
     except Exception as e:
