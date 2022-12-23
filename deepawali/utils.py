@@ -13,7 +13,7 @@ from requests_html import HTMLSession
 import re
 
 
-#extract keywords
+
 
 def extract_keywords(text, wordcount, duplication, max_keywords):
     """
@@ -41,6 +41,7 @@ def extract_keywords(text, wordcount, duplication, max_keywords):
         return []
 
 
+
 def text_cleaning(text):
     try:
         text = re.sub(r'[\n\r]+', '\n', text)
@@ -51,16 +52,17 @@ def text_cleaning(text):
         updated_keywords['three'] = []
 
         for i in keywords:
+            
             if detectlanguage(i[0],False)=='en':
 
                 word_len = len(i[0].split())
                 if word_len==1:
-                    updated_keywords['one'].append({i[0]: text.count(i[0])+1})
+                    updated_keywords['one'].append({i[0]: 1 if text.count(i[0])==0 else text.count(i[0])})
                 elif word_len==2:
-                    updated_keywords['two'].append({i[0]: text.count(i[0])+1})
+                    updated_keywords['two'].append({i[0]: 1 if text.count(i[0])==0 else text.count(i[0])})
                 elif word_len==3:
-                    updated_keywords['three'].append({i[0]: text.count(i[0])+1})
-     
+                    updated_keywords['three'].append({i[0]: 1 if text.count(i[0])==0 else text.count(i[0])})
+            
         return updated_keywords
 
     except Exception as e:
@@ -68,6 +70,32 @@ def text_cleaning(text):
         return dict()
 
 
+def get_keywords_from_text(text,wordcount, duplication, max_keywords):
+    try:
+        keywords = extract_keywords(text,wordcount, duplication, max_keywords)
+        updated_keywords = dict()
+        updated_keywords['one'] = []
+        updated_keywords['two'] = []
+        updated_keywords['three'] = []
+
+        for i in keywords:
+            
+            if detectlanguage(i[0],False)=='en':
+
+                word_len = len(i[0].split())
+                if word_len==1:
+                    updated_keywords['one'].append({i[0]: 1 if text.count(i[0])==0 else text.count(i[0])})
+                elif word_len==2:
+                    updated_keywords['two'].append({i[0]: 1 if text.count(i[0])==0 else text.count(i[0])})
+                elif word_len==3:
+                    updated_keywords['three'].append({i[0]: 1 if text.count(i[0])==0 else text.count(i[0])})
+            
+        return updated_keywords
+    
+    except Exception as e:
+        print(e)
+        return {}
+    
 def get_page_content(url):
     print("get_page_content")
     headers = {
