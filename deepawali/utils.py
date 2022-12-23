@@ -11,7 +11,15 @@ from pytrends.request import TrendReq
 from rake_nltk import Rake
 from requests_html import HTMLSession
 import re
+from multiprocessing.pool import ThreadPool
 
+
+def get_response_code(url):
+    response_code = requests.get(url).status_code
+
+    return response_code
+
+    
 
 def get_site_links(url):
     try:
@@ -22,13 +30,7 @@ def get_site_links(url):
         for link in soup.find_all('a'):
             flag = re.findall('^http|https.*',link.get('href'))
             if flag:
-                temp = dict()
-                #response_code = requests.get(link.get('href')).status_code
-
-                #temp['status_code'] = response_code
-                #temp['url'] = link.get('href')
                 urls.append(link.get('href'))
-        
         return urls
     except Exception as e:
         print(e)
@@ -267,6 +269,4 @@ def get_keyword_suggestions(keyword, country):
         
     return sugg_all
     
-    
-
     
