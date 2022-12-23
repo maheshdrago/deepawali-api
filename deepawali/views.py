@@ -1,7 +1,7 @@
 from deepawali import app
 from flask_restful import Resource
 from flask import request,jsonify
-from deepawali.utils import get_domain_data, get_keyword_suggestions,related_keywords,get_page_content,get_keywords_from_text,get_site_links
+from deepawali.utils import get_domain_data, get_keyword_suggestions,related_keywords,get_page_content,get_keywords_from_text,get_site_links,get_response_code
 
 
 class GetDomainData(Resource):
@@ -79,5 +79,17 @@ class GetBrokenLinks(Resource):
             return jsonify({"urls":urls})
         
         except Exception as e:
-            return e     
+            return e  
+
+class GetResponseCode(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
+            url = data['url']
+            res = get_response_code(url)
+            return jsonify({"response_code":res})
+        
+        except Exception as e:
+            return e 
+            
 
