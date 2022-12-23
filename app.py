@@ -1,6 +1,6 @@
 from deepawali import app
 from deepawali import views
-from deepawali.views import GetDomainData, GetKeywordSuggestions, GetKeywordsFromText, GetRelatedKeywords, GetKeywordsFromURL,GetBrokenLinks
+from deepawali.views import GetDomainData, GetKeywordSuggestions, GetKeywordsFromText, GetRelatedKeywords, GetKeywordsFromURL,GetBrokenLinks,GetResponseCode
 from flask_restful import Api
 from flask_cors import CORS
 
@@ -13,6 +13,9 @@ api.add_resource(GetKeywordsFromText, '/keywordsFromText')
 api.add_resource(GetRelatedKeywords, '/relatedKeywords')
 api.add_resource(GetKeywordsFromURL, '/getKeywordsFromUrl')
 api.add_resource(GetBrokenLinks, '/getBrokenlinks')
+api.add_resource(GetResponseCode, '/getResponseCode')
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
