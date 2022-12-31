@@ -12,28 +12,54 @@ from rake_nltk import Rake
 from requests_html import HTMLSession
 import re
 from multiprocessing.pool import ThreadPool
+from urllib.parse import urlparse
+from tldextract import extract
 
+
+
+
+def get_url_data(url):
+    print(urlparse('http://abc.hostname.com/somethings/anything/'))
+
+
+def is_internal(url, domain):
+    if not bool(urlparse(url).netloc):
+        return True
+    elif domain in url:
+        return True
+    else:
+        return False
 
 def get_response_code(url):
-    response_code = requests.get(url).status_code
-
+    response = requests.get(url)
+    reason = response.reason
+    response_code = response.status_code
+    
     return response_code
 
-    
 
 def get_site_links(url):
     try:
         reqs = requests.get(url)
         soup = BeautifulSoup(reqs.text, 'html.parser')
-        
         urls = []
         for link in soup.find_all('a'):
-            flag = re.findall('^http|https.*',link.get('href'))
-            if flag:
-                urls.append(link.get('href'))
+            data = dict()
+            try:
+                flag = re.findall('^http|https.*',link.get('href'))
+                if flag:
+                    tsd, td, tsu = extract(url) # prints abc, hostname, com
+
+                    data['url'] = link.get('href')
+                    data['text'] = link.text
+                    data['internal'] = is_internal(link.get('href'), td)
+                    urls.append(data)
+            except Exception as e:
+                print(e)
+                continue
         return urls
     except Exception as e:
-        print(e)
+        print(e,'--------')
         return []
 
 
@@ -269,4 +295,6 @@ def get_keyword_suggestions(keyword, country):
         
     return sugg_all
     
+    
+
     
