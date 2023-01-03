@@ -15,27 +15,78 @@ from multiprocessing.pool import ThreadPool
 from urllib.parse import urlparse
 from tldextract import extract
 from seoanalyzer import analyze
+from nltk import ngrams
+from nltk.corpus import stopwords
+from collections import Counter
 
+def fetch_html(url):
+    # Fetch the HTML content of the given URL
+    response = requests.get(url)
+    return response.text
 
+def extract_text(html):
+    # Use BeautifulSoup to extract the text content from the HTML document
+    soup = BeautifulSoup(html, 'html.parser')
+    text = soup.get_text()
+    return text
+
+def preprocess_text(text):
+    # Remove punctuation, convert to lowercase, and split into a list of words
+    text = text.lower()
+    text = text.replace(',', '').replace('.', '').replace('!', '').replace('?', '')
+    words = text.split()
+    # Remove stopwords
+    stop_words = set(stopwords.words('english'))
+    words = [word for word in words if word not in stop_words]
+    return words
+
+def compute_keyword_densities(words, n=1):
+    # Compute the densities of the individual words and n-grams in the list
+    densities = {}
+    if n == 1:
+        # Compute the densities of individual words
+        densities = Counter(words)
+    else:
+        # Compute the densities of n-grams
+        ngrams_list = list(ngrams(words, n))
+        densities = Counter(ngrams_list)
+    return densities
+
+def get_top_densities(densities, length, n=15):
+    sorted_densities = sorted(densities.items(), key=lambda x: x[1], reverse=True)
+    arr = []
+    if length==1:
+        for i in range(n):
+            arr.append({sorted_densities[i][0]: int(sorted_densities[i][1])})
+    else:
+        for i in range(n):
+            arr.append({' '.join(sorted_densities[i][0]): int(sorted_densities[i][1])})
+    return arr
 
 def get_url_data(url):
     print(urlparse('http://abc.hostname.com/somethings/anything/'))
 
 def get_keywords_of_an_url(url):
-    output = analyze(url, follow_links=False)
+    html = fetch_html(url)
+    text = extract_text(html)
+    words = preprocess_text(text)
+    keywords = {'one':[],'two':[],'three':[]}
+    for i in keywords:
+        if i=='one':
+            densities = compute_keyword_densities(words, n=1)
+            updated_densities = get_top_densities(densities, 1, 15)  # Set n to the length of the n-grams you want to compute
+            keywords[i] = updated_densities
+        elif i=='two':
+            densities = compute_keyword_densities(words, n=2)
+            cleaned_densities_two = get_top_densities(densities, 2, 15)
+            keywords[i] = cleaned_densities_two
+                
+        else:
+            densities = compute_keyword_densities(words, n=3)
+            cleaned_densities_three = get_top_densities(densities, 3, 15)
+            keywords[i] = cleaned_densities_three
 
-    one = []
-    two = []
-    three = []
-    four = []
-
-    for i in output['keywords']:
-        if len(i['word'].split()) == 1 and not i['word'].isnumeric():
-            one.append({i['word']: i['count']})
-        elif len(i['word'].split()) == 2 and not i['word'].isnumeric():
-            two.append({i['word']: i['count']})
-        elif len(i['word'].split()) == 3 and not i['word'].isnumeric():
-            three.append({i['word']: i['count']})
+    return keywords
 
     updated_keywords = dict()
     updated_keywords['one'] = one
@@ -113,51 +164,6 @@ def extract_keywords(text, wordcount, duplication, max_keywords):
 
 
 
-def text_cleaning(text):
-    try:
-        
-        output = ''
-        blacklist = [
-            'comment -##'
-            '[document]',
-            'noscript',
-            'header',
-            'html',
-            'meta',
-            'head', 
-            'input',
-            'script',
-            'style',
-            'input'
-        ]
-        for t in text:
-            if t.parent.name not in blacklist:
-                output += t.replace("\n","").replace("\t","")
-
-        keywords = extract_keywords(output, 1, 0.9, 100)
-        
-        updated_keywords = dict()
-        updated_keywords['one'] = []
-        updated_keywords['two'] = []
-        updated_keywords['three'] = []
-
-        for i in keywords:
-            
-            if detectlanguage(i[0],False)=='en':
-
-                word_len = len(i[0].split())
-                if word_len==1:
-                    updated_keywords['one'].append({i[0]: 1 if text.count(i[0])==0 else output.count(i[0])})
-                elif word_len==2:
-                    updated_keywords['two'].append({i[0]: 1 if text.count(i[0])==0 else output.count(i[0])})
-                elif word_len==3:
-                    updated_keywords['three'].append({i[0]: 1 if text.count(i[0])==0 else output.count(i[0])})
-            
-        return updated_keywords
-
-    except Exception as e:
-        print(e)
-        return dict()
 
 
 def get_keywords_from_text(text,wordcount, duplication, max_keywords):
