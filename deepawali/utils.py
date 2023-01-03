@@ -14,13 +14,35 @@ import re
 from multiprocessing.pool import ThreadPool
 from urllib.parse import urlparse
 from tldextract import extract
-
+from seoanalyzer import analyze
 
 
 
 def get_url_data(url):
     print(urlparse('http://abc.hostname.com/somethings/anything/'))
 
+def get_keywords_of_an_url(url):
+    output = analyze(url, follow_links=False)
+
+    one = []
+    two = []
+    three = []
+    four = []
+
+    for i in output['keywords']:
+        if len(i['word'].split()) == 1 and not i['word'].isnumeric():
+            one.append({i['word']: i['count']})
+        elif len(i['word'].split()) == 2 and not i['word'].isnumeric():
+            two.append({i['word']: i['count']})
+        elif len(i['word'].split()) == 3 and not i['word'].isnumeric():
+            three.append({i['word']: i['count']})
+
+    updated_keywords = dict()
+    updated_keywords['one'] = one
+    updated_keywords['two'] = two
+    updated_keywords['three'] = three
+
+    return updated_keywords
 
 def is_internal(url, domain):
     if not bool(urlparse(url).netloc):
@@ -93,8 +115,27 @@ def extract_keywords(text, wordcount, duplication, max_keywords):
 
 def text_cleaning(text):
     try:
-        text = re.sub(r'[\n\r]+', '\n', text)
-        keywords = extract_keywords(text, 4, 0.9, 100)
+        
+        output = ''
+        blacklist = [
+            'comment -##'
+            '[document]',
+            'noscript',
+            'header',
+            'html',
+            'meta',
+            'head', 
+            'input',
+            'script',
+            'style',
+            'input'
+        ]
+        for t in text:
+            if t.parent.name not in blacklist:
+                output += t.replace("\n","").replace("\t","")
+
+        keywords = extract_keywords(output, 1, 0.9, 100)
+        
         updated_keywords = dict()
         updated_keywords['one'] = []
         updated_keywords['two'] = []
@@ -106,11 +147,11 @@ def text_cleaning(text):
 
                 word_len = len(i[0].split())
                 if word_len==1:
-                    updated_keywords['one'].append({i[0]: 1 if text.count(i[0])==0 else text.count(i[0])})
+                    updated_keywords['one'].append({i[0]: 1 if text.count(i[0])==0 else output.count(i[0])})
                 elif word_len==2:
-                    updated_keywords['two'].append({i[0]: 1 if text.count(i[0])==0 else text.count(i[0])})
+                    updated_keywords['two'].append({i[0]: 1 if text.count(i[0])==0 else output.count(i[0])})
                 elif word_len==3:
-                    updated_keywords['three'].append({i[0]: 1 if text.count(i[0])==0 else text.count(i[0])})
+                    updated_keywords['three'].append({i[0]: 1 if text.count(i[0])==0 else output.count(i[0])})
             
         return updated_keywords
 
@@ -146,15 +187,19 @@ def get_keywords_from_text(text,wordcount, duplication, max_keywords):
         return {}
     
 def get_page_content(url):
-    print("get_page_content")
     headers = {
         'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
     }
 
     with HTMLSession() as session:
         try:
-            res = session.get(url, headers=headers, timeout=200)
-            return text_cleaning(BeautifulSoup(res.content, 'html.parser').text)
+            
+            res = requests.get(url,headers=headers)
+            html_page = res.content
+
+            soup = BeautifulSoup(html_page, 'html.parser')
+            text = soup.find_all(text=True)
+            return text_cleaning(text)
         except Exception as e:
             print(e)
             return text_cleaning(BeautifulSoup('', 'html.parser').text)
