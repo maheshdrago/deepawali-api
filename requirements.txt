@@ -50,3 +50,4 @@ Werkzeug==2.0.3
 yake==0.4.8
 zipp==3.11.0
 tldextract
+pyseoanalyzer
