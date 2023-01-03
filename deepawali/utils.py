@@ -67,33 +67,30 @@ def get_url_data(url):
     print(urlparse('http://abc.hostname.com/somethings/anything/'))
 
 def get_keywords_of_an_url(url):
-    html = fetch_html(url)
-    text = extract_text(html)
-    words = preprocess_text(text)
-    keywords = {'one':[],'two':[],'three':[]}
-    for i in keywords:
-        if i=='one':
-            densities = compute_keyword_densities(words, n=1)
-            updated_densities = get_top_densities(densities, 1, 15)  # Set n to the length of the n-grams you want to compute
-            keywords[i] = updated_densities
-        elif i=='two':
-            densities = compute_keyword_densities(words, n=2)
-            cleaned_densities_two = get_top_densities(densities, 2, 15)
-            keywords[i] = cleaned_densities_two
-                
-        else:
-            densities = compute_keyword_densities(words, n=3)
-            cleaned_densities_three = get_top_densities(densities, 3, 15)
-            keywords[i] = cleaned_densities_three
-
+    try:
+        html = fetch_html(url)
+        text = extract_text(html)
+        words = preprocess_text(text)
+        keywords = {'one':[],'two':[],'three':[]}
+        for i in keywords:
+            if i=='one':
+                densities = compute_keyword_densities(words, n=1)
+                updated_densities = get_top_densities(densities, 1, 15)  # Set n to the length of the n-grams you want to compute
+                keywords[i] = updated_densities
+            elif i=='two':
+                densities = compute_keyword_densities(words, n=2)
+                cleaned_densities_two = get_top_densities(densities, 2, 15)
+                keywords[i] = cleaned_densities_two
+                    
+            else:
+                densities = compute_keyword_densities(words, n=3)
+                cleaned_densities_three = get_top_densities(densities, 3, 15)
+                keywords[i] = cleaned_densities_three
+    except Exception as e:
+        print(e)
+        return []
     return keywords
 
-    updated_keywords = dict()
-    updated_keywords['one'] = one
-    updated_keywords['two'] = two
-    updated_keywords['three'] = three
-
-    return updated_keywords
 
 def is_internal(url, domain):
     if not bool(urlparse(url).netloc):
@@ -348,4 +345,4 @@ def get_keyword_suggestions(keyword, country):
     
     
 
-    
+  
