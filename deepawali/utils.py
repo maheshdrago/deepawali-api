@@ -19,16 +19,41 @@ from nltk import ngrams
 from nltk.corpus import stopwords
 from collections import Counter
 
+
 def fetch_html(url):
     # Fetch the HTML content of the given URL
     response = requests.get(url)
     return response.text
 
+
+def remove_comments(html):
+    # Use a regular expression to remove the comments from the HTML content
+    pattern = re.compile(r'<!--(.*?)-->', re.DOTALL)
+    return pattern.sub('', html)
+
+
 def extract_text(html):
     # Use BeautifulSoup to extract the text content from the HTML document
     soup = BeautifulSoup(html, 'html.parser')
+    reply_elements = soup.find_all(class_='reply')
+    # Remove the elements from the HTML document
+    for element in reply_elements:
+        element.extract()
+    
     text = soup.get_text()
     return text
+
+def is_not_letter(string):
+    if len(string) == 1 and not string.isalpha():
+        return True
+    return False
+
+
+def is_hindi(string):
+    for char in string:
+        if ord(char) >= 2304 and ord(char) <= 2431:
+            return True
+    return False
 
 def preprocess_text(text):
     # Remove punctuation, convert to lowercase, and split into a list of words
@@ -37,7 +62,7 @@ def preprocess_text(text):
     words = text.split()
     # Remove stopwords
     stop_words = set(stopwords.words('english'))
-    words = [word for word in words if word not in stop_words]
+    words = [word for word in words if word not in stop_words and not word.isnumeric() and not is_hindi(word) and not is_not_letter(word)]
     return words
 
 def compute_keyword_densities(words, n=1):
@@ -69,6 +94,7 @@ def get_url_data(url):
 def get_keywords_of_an_url(url):
     try:
         html = fetch_html(url)
+        html = remove_comments(html)
         text = extract_text(html)
         words = preprocess_text(text)
         keywords = {'one':[],'two':[],'three':[]}
@@ -159,7 +185,51 @@ def extract_keywords(text, wordcount, duplication, max_keywords):
     except Exception as e:
         return []
 
+def text_cleaning(text):
+    try:
+        
+        output = ''
+        blacklist = [
+            'comment -##'
+            '[document]',
+            'noscript',
+            'header',
+            'html',
+            'meta',
+            'head', 
+            'input',
+            'script',
+            'style',
+            'input'
+        ]
+        for t in text:
+            if t.parent.name not in blacklist:
+                output += t.replace("\n","").replace("\t","")
 
+        keywords = extract_keywords(output, 1, 0.9, 100)
+        
+        updated_keywords = dict()
+        updated_keywords['one'] = []
+        updated_keywords['two'] = []
+        updated_keywords['three'] = []
+
+        for i in keywords:
+            
+            if detectlanguage(i[0],False)=='en':
+
+                word_len = len(i[0].split())
+                if word_len==1:
+                    updated_keywords['one'].append({i[0]: 1 if text.count(i[0])==0 else output.count(i[0])})
+                elif word_len==2:
+                    updated_keywords['two'].append({i[0]: 1 if text.count(i[0])==0 else output.count(i[0])})
+                elif word_len==3:
+                    updated_keywords['three'].append({i[0]: 1 if text.count(i[0])==0 else output.count(i[0])})
+            
+        return updated_keywords
+
+    except Exception as e:
+        print(e)
+        return dict()
 
 
 
@@ -345,4 +415,4 @@ def get_keyword_suggestions(keyword, country):
     
     
 
-  
+    
