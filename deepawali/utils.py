@@ -121,13 +121,9 @@ def get_keywords_of_an_url(url):
 
 
 def get_response_code(url):
-    try:
-        response = requests.get(url)
-        reason = response.reason
-        response_code = response.status_code
-    except Exception as e:
-        print(e)
-        return 0
+    response = requests.get(url)
+    reason = response.reason
+    response_code = response.status_code
     
     return response_code
 
@@ -167,17 +163,20 @@ def get_site_links(url):
         for link in links:
             data = dict()
             try:
-                if link.get('href')=='#':
-                    data['url'] = url
-                    data['text'] = ''
-                else:
+                if link.get('href').startswith('https') or link.get('href').startswith('http'):
                     data['url'] = link.get('href')
                     data['text'] = link.text
+                    internal = is_internal(url, link)
 
-                internal = is_internal(url, link)
+                else:
+                    data['url'] = url
+                    data['text'] = ''
+                    internal = True
+                
                 if internal:
                     internal_flag +=1
                 else:
+                    print(link.get('href'))
                     external_flag+=1
                 data['internal'] = internal
                 
