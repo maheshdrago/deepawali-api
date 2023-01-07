@@ -20,6 +20,8 @@ from nltk.corpus import stopwords
 from collections import Counter
 
 
+
+
 def fetch_html(url):
     # Fetch the HTML content of the given URL
     response = requests.get(url)
@@ -118,14 +120,6 @@ def get_keywords_of_an_url(url):
     return keywords
 
 
-def is_internal(url, domain):
-    if not bool(urlparse(url).netloc):
-        return True
-    elif domain in url:
-        return True
-    else:
-        return False
-
 def get_response_code(url):
     response = requests.get(url)
     reason = response.reason
@@ -133,27 +127,69 @@ def get_response_code(url):
     
     return response_code
 
+def is_internal(url, link):
+    base_url = urlparse(url).netloc
+
+    href = link.get('href')
+    if (href and urlparse(href).netloc == base_url) or href=='#':
+        return True
+    elif href:
+        return False
+
+
+def is_no_follow(link):
+
+    rel = link.get('rel')
+    
+    if rel!=None and 'nofollow' in rel:
+        return True
+    else:
+        return False
 
 def get_site_links(url):
     try:
-        reqs = requests.get(url)
-        soup = BeautifulSoup(reqs.text, 'html.parser')
+        html = requests.get(url).text
+        soup = BeautifulSoup(html, 'html.parser')
+        links = soup.find_all('a')
         urls = []
-        for link in soup.find_all('a'):
+        internal_flag = 0
+        external_flag = 0
+
+        dofollow_count = 0
+        nofollow_count = 0
+
+        total_cnt = len(links)
+
+        for link in links:
             data = dict()
             try:
-                flag = re.findall('^http|https.*',link.get('href'))
-                if flag:
-                    tsd, td, tsu = extract(url) # prints abc, hostname, com
-
+                if link.get('href')=='#':
+                    data['url'] = url
+                    data['text'] = ''
+                else:
                     data['url'] = link.get('href')
                     data['text'] = link.text
-                    data['internal'] = is_internal(link.get('href'), td)
-                    urls.append(data)
+
+                internal = is_internal(url, link)
+                if internal:
+                    internal_flag +=1
+                else:
+                    external_flag+=1
+                data['internal'] = internal
+                
+                no_follow = is_no_follow(link)
+                if no_follow:
+                    nofollow_count+=1
+                else:
+                    dofollow_count+=1
+                data['no_follow'] = no_follow
+ 
+                urls.append(data)
             except Exception as e:
                 print(e)
                 continue
-        return urls
+ 
+        return {"urls":urls, "internalLinks":internal_flag, "externalLinks":external_flag, "no_follow":nofollow_count, "do_follow":dofollow_count, "total_cnt":total_cnt }
     except Exception as e:
         print(e,'--------')
         return []
