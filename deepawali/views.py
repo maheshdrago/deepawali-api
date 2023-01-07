@@ -76,7 +76,7 @@ class GetBrokenLinks(Resource):
             data = request.get_json()
             url = data['url']
             urls = get_site_links(url)
-            return jsonify({"urls":urls})
+            return jsonify(urls)
         
         except Exception as e:
             return e  
