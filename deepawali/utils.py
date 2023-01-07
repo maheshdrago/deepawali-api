@@ -121,9 +121,13 @@ def get_keywords_of_an_url(url):
 
 
 def get_response_code(url):
-    response = requests.get(url)
-    reason = response.reason
-    response_code = response.status_code
+    try:
+        response = requests.get(url)
+        reason = response.reason
+        response_code = response.status_code
+    except Exception as e:
+        print(e)
+        return 0
     
     return response_code
 
