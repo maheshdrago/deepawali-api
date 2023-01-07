@@ -169,8 +169,18 @@ def get_site_links(url):
                     internal = is_internal(url, link)
 
                 else:
-                    data['url'] = url
-                    data['text'] = ''
+                    if "#" in link.get('href'):
+                        if url[-1]=='/':
+                            data['url'] = url+link.get('href').replace('/','')
+                        else:
+                            data['url'] = url+'/'+link.get('href').replace('/','')
+                    else:
+                        data['url'] = url
+                        
+                    if 'comment' in link.get('href').lower():
+                        data['text'] = 'Reply'
+                    else:
+                        data['text'] = ''
                     internal = True
                 
                 if internal:
