@@ -122,10 +122,13 @@ def get_keywords_of_an_url(url):
 
 
 def get_response_code(url):
-    time.sleep(1)
-    response = requests.get(url)
+    headers = {'Access-Control-Allow-Origin': '*'}
+    response = requests.get(url, headers=headers)
     reason = response.reason
     response_code = response.status_code
+    
+    return response_code
+
     
     return response_code
 
