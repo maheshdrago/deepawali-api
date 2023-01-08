@@ -18,6 +18,7 @@ from seoanalyzer import analyze
 from nltk import ngrams
 from nltk.corpus import stopwords
 from collections import Counter
+import time
 
 
 
@@ -121,6 +122,7 @@ def get_keywords_of_an_url(url):
 
 
 def get_response_code(url):
+    time.sleep(1)
     response = requests.get(url)
     reason = response.reason
     response_code = response.status_code
