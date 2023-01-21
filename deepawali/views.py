@@ -1,7 +1,21 @@
 from deepawali import app
 from flask_restful import Resource
 from flask import request,jsonify
-from deepawali.utils import get_domain_data, get_keyword_suggestions,related_keywords,get_page_content,get_keywords_from_text,get_site_links,get_response_code,get_keywords_of_an_url
+from deepawali.utils import get_domain_data, get_keyword_suggestions,related_keywords,get_page_content,get_keywords_from_text,get_site_links,get_response_code,get_keywords_of_an_url,historic_trends
+
+
+class GetHistoricTrends(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
+            keywords = data['keywords']
+            country = data['country']
+            historic_data = historic_trends(keywords,country)
+            print(country)
+            return jsonify({'data':historic_data})  
+             
+        except Exception as e:
+            return jsonify(error=str(e))
 
 
 class GetDomainData(Resource):
